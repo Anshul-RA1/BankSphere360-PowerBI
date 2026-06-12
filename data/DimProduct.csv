@@ -1,0 +1,11 @@
+ProductID,ProductName,ProductCategory,Segment
+1,Savings Account,Deposits,Retail
+2,Current Account,Deposits,SME
+3,Fixed Deposit,Deposits,Retail
+4,Home Loan,Loans,Retail
+5,Personal Loan,Loans,Retail
+6,Auto Loan,Loans,Retail
+7,Credit Card,Cards,Retail
+8,Business Loan,Loans,SME
+9,Working Capital,Loans,SME
+10,Wealth Portfolio,Wealth,HNI

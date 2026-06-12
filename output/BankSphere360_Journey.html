@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BankSphere 360 — The End-to-End Power BI Journey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0e1726; --ink-soft:#33405a; --paper:#f4f1ea; --paper-2:#ece7db;
+    --gold:#b8852a; --gold-soft:#e3c478; --teal:#0d5c52; --teal-2:#0a463e;
+    --red:#a8362b; --line:#d8d0bf; --card:#fbf9f3; --shadow:rgba(14,23,38,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"Newsreader",Georgia,serif;background:var(--paper);color:var(--ink);
+    line-height:1.65;font-size:18px;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 12% 8%,rgba(184,133,42,.05),transparent 42%),
+      radial-gradient(circle at 88% 92%,rgba(13,92,82,.05),transparent 42%);}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  h1,h2,h3,h4{font-family:"Fraunces",serif;line-height:1.12;color:var(--ink);font-weight:600}
+  code,pre,.mono{font-family:"JetBrains Mono",monospace}
+  a{color:var(--teal)}
+
+  /* ---------- top bar ---------- */
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(244,241,234,.86);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+  .brand{font-family:"Fraunces";font-weight:700;letter-spacing:.3px;font-size:16px}
+  .brand b{color:var(--gold)}
+  .navlinks{display:flex;gap:18px;font-family:"JetBrains Mono";font-size:12px;text-transform:uppercase;letter-spacing:.8px}
+  .navlinks a{color:var(--ink-soft);text-decoration:none}
+  .navlinks a:hover{color:var(--gold)}
+  @media(max-width:760px){.navlinks{display:none}}
+
+  /* ---------- hero ---------- */
+  .hero{padding:90px 0 60px;border-bottom:2px solid var(--ink);position:relative;overflow:hidden}
+  .kicker{font-family:"JetBrains Mono";font-size:12.5px;letter-spacing:3px;text-transform:uppercase;
+    color:var(--gold);margin-bottom:22px}
+  .hero h1{font-size:clamp(44px,8vw,92px);font-weight:700;letter-spacing:-1.5px}
+  .hero h1 em{font-style:italic;color:var(--teal)}
+  .hero .sub{font-size:clamp(19px,2.4vw,24px);max-width:620px;margin-top:24px;color:var(--ink-soft)}
+  .hero .meta{display:flex;gap:30px;flex-wrap:wrap;margin-top:40px;font-family:"JetBrains Mono";
+    font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft)}
+  .hero .meta b{display:block;font-size:22px;font-family:"Fraunces";color:var(--ink);text-transform:none;letter-spacing:0}
+  .seal{position:absolute;right:-40px;top:40px;width:230px;height:230px;opacity:.10;
+    border:3px solid var(--ink);border-radius:50%;display:grid;place-items:center;rotate:-8deg}
+  .seal span{font-family:"Fraunces";font-weight:700;font-size:54px}
+  @media(max-width:760px){.seal{display:none}}
+
+  /* ---------- section scaffolding ---------- */
+  section{padding:64px 0;border-bottom:1px solid var(--line)}
+  .sec-no{font-family:"JetBrains Mono";font-size:12px;letter-spacing:2px;color:var(--gold);
+    text-transform:uppercase;margin-bottom:10px}
+  section>.wrap>h2{font-size:clamp(30px,5vw,46px);font-weight:600;letter-spacing:-.5px;margin-bottom:8px}
+  .lead{font-size:20px;color:var(--ink-soft);max-width:740px;margin:14px 0 30px}
+  p{margin-bottom:16px}
+  .prose p{max-width:760px}
+
+  /* ---------- pills / chips ---------- */
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+  .chip{font-family:"JetBrains Mono";font-size:11.5px;letter-spacing:.5px;background:var(--paper-2);
+    border:1px solid var(--line);padding:5px 11px;border-radius:20px;color:var(--ink-soft)}
+
+  /* ---------- KPI strip ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:28px 0}
+  @media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;
+    box-shadow:0 2px 10px var(--shadow)}
+  .kpi .v{font-family:"Fraunces";font-weight:700;font-size:30px;color:var(--teal)}
+  .kpi .l{font-family:"JetBrains Mono";font-size:11px;text-transform:uppercase;letter-spacing:.6px;
+    color:var(--ink-soft);margin-top:4px}
+  .kpi.warn .v{color:var(--red)}
+
+  /* ---------- timeline ---------- */
+  .tl{position:relative;margin-top:26px;padding-left:34px}
+  .tl::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;
+    background:linear-gradient(var(--gold),var(--teal))}
+  .day{position:relative;margin-bottom:14px;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;overflow:hidden;box-shadow:0 1px 6px var(--shadow);transition:.2s}
+  .day:hover{box-shadow:0 6px 18px var(--shadow);transform:translateY(-1px)}
+  .day::before{content:"";position:absolute;left:-29px;top:22px;width:14px;height:14px;border-radius:50%;
+    background:var(--gold);border:3px solid var(--paper)}
+  .day summary{list-style:none;cursor:pointer;padding:18px 20px;display:flex;align-items:baseline;gap:16px}
+  .day summary::-webkit-details-marker{display:none}
+  .day .dno{font-family:"JetBrains Mono";font-size:12px;color:var(--gold);font-weight:600;min-width:54px}
+  .day .dt{font-family:"Fraunces";font-weight:600;font-size:21px}
+  .day .dtag{margin-left:auto;font-family:"JetBrains Mono";font-size:11px;color:var(--ink-soft);
+    border:1px solid var(--line);padding:3px 9px;border-radius:14px;white-space:nowrap}
+  .day .body{padding:0 20px 20px 90px}
+  .day[open] summary .dt{color:var(--teal)}
+  .lbl{font-family:"JetBrains Mono";font-size:11px;letter-spacing:.5px;text-transform:uppercase;
+    color:var(--gold);margin:14px 0 5px;font-weight:600}
+
+  /* ---------- code blocks ---------- */
+  pre{background:var(--ink);color:#e8e4d8;border-radius:10px;padding:16px 18px;overflow-x:auto;
+    font-size:13.5px;line-height:1.6;margin:12px 0;border:1px solid #1d2840}
+  pre .c{color:#7e8aa3;font-style:italic}
+  pre .k{color:var(--gold-soft)}
+  pre .f{color:#7fcabc}
+  code.inline{background:var(--paper-2);padding:2px 6px;border-radius:5px;font-size:.86em;color:var(--teal-2)}
+
+  /* ---------- tables ---------- */
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-family:"Newsreader";font-size:16px;
+    background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th{background:var(--ink);color:var(--paper);text-align:left;padding:11px 14px;font-family:"JetBrains Mono";
+    font-size:11px;text-transform:uppercase;letter-spacing:.6px;font-weight:500}
+  td{padding:10px 14px;border-top:1px solid var(--line);vertical-align:top}
+  tr:nth-child(even) td{background:rgba(216,208,191,.18)}
+
+  /* ---------- doc cards ---------- */
+  .docgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:24px}
+  @media(max-width:760px){.docgrid{grid-template-columns:1fr}}
+  .doc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;
+    box-shadow:0 2px 10px var(--shadow);position:relative}
+  .doc .tag{font-family:"JetBrains Mono";font-size:10.5px;letter-spacing:1px;color:var(--gold);
+    text-transform:uppercase}
+  .doc h4{font-size:21px;margin:6px 0 8px}
+  .doc p{font-size:15.5px;color:var(--ink-soft);margin-bottom:0}
+
+  /* ---------- model diagram ---------- */
+  .model{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0}
+  @media(max-width:760px){.model{grid-template-columns:1fr}}
+  .tbl{border-radius:10px;border:1px solid var(--line);overflow:hidden;box-shadow:0 2px 8px var(--shadow)}
+  .tbl .hd{padding:9px 13px;font-family:"JetBrains Mono";font-size:12px;font-weight:600;color:#fff}
+  .tbl.dim .hd{background:var(--teal)}
+  .tbl.fact .hd{background:var(--gold)}
+  .tbl ul{list-style:none;background:var(--card);padding:8px 13px;font-size:13.5px;font-family:"JetBrains Mono"}
+  .tbl li{padding:3px 0;color:var(--ink-soft)}
+  .tbl li.key{color:var(--ink);font-weight:600}
+
+  /* ---------- interview accordion ---------- */
+  .round{margin-bottom:30px}
+  .round h3{font-size:24px;margin-bottom:4px;display:flex;align-items:center;gap:12px}
+  .round h3 .dot{width:12px;height:12px;border-radius:50%}
+  .qa{background:var(--card);border:1px solid var(--line);border-radius:10px;margin:8px 0;overflow:hidden}
+  .qa summary{cursor:pointer;list-style:none;padding:14px 18px;font-family:"Fraunces";font-weight:600;
+    font-size:16.5px;display:flex;gap:12px;align-items:flex-start}
+  .qa summary::-webkit-details-marker{display:none}
+  .qa summary::before{content:"+";color:var(--gold);font-family:"JetBrains Mono";font-weight:700;
+    font-size:18px;line-height:1}
+  .qa[open] summary::before{content:"\2013"}
+  .qa .ans{padding:0 18px 16px 42px;color:var(--ink-soft);font-size:16px}
+  .qa .ans code.inline{font-size:.82em}
+
+  /* ---------- callouts ---------- */
+  .note{border-left:4px solid var(--gold);background:rgba(184,133,42,.08);padding:14px 18px;
+    border-radius:0 10px 10px 0;margin:18px 0;font-size:16px}
+  .note b{font-family:"Fraunces"}
+  .note.teal{border-color:var(--teal);background:rgba(13,92,82,.08)}
+
+  /* ---------- footer ---------- */
+  footer{padding:54px 0 70px;text-align:center}
+  footer .mark{font-family:"Fraunces";font-weight:700;font-size:30px}
+  footer .mark b{color:var(--gold)}
+  footer p{color:var(--ink-soft);font-size:15px;max-width:560px;margin:14px auto 0}
+  .progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--teal));z-index:60;width:0}
+  ::selection{background:var(--gold-soft)}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+
+<div class="topbar"><div class="wrap">
+  <div class="brand">BankSphere<b>360</b></div>
+  <nav class="navlinks">
+    <a href="#overview">Overview</a>
+    <a href="#docs">Documents</a>
+    <a href="#journey">10-Day Journey</a>
+    <a href="#model">Model</a>
+    <a href="#dax">DAX</a>
+    <a href="#interview">Interview</a>
+  </nav>
+</div></div>
+
+<!-- HERO -->
+<header class="hero"><div class="wrap">
+  <div class="seal"><span>360</span></div>
+  <div class="kicker">Power BI Developer / Analyst &middot; Banking Domain &middot; 10-Day Build</div>
+  <h1>BankSphere <em>360</em><br>The End-to-End Journey</h1>
+  <p class="sub">A complete, real-world retail &amp; SME banking analytics project — from raw core-banking data to a governed, secured, deployed Power BI solution. Every skill in the job description, taught through one build.</p>
+  <div class="meta">
+    <div>Domain<b>Retail &amp; SME Banking</b></div>
+    <div>Duration<b>10 Days</b></div>
+    <div>Deliverables<b>5 Docs + .pbix</b></div>
+    <div>Rounds<b>Tech / Mgr / HR</b></div>
+  </div>
+</div></header>
+
+<!-- OVERVIEW -->
+<section id="overview"><div class="wrap prose">
+  <div class="sec-no">01 — The Brief</div>
+  <h2>What we are building, and why a bank</h2>
+  <p class="lead">A bank is the perfect teaching domain: it has money flowing in (deposits), money flowing out (loans), risk that must be watched (NPAs), and customers behaving across channels. Every Power BI concept has a natural home here.</p>
+  <p>BankSphere 360 consolidates core-banking, customer-master and transaction data into one governed semantic model and serves five personas — leadership, branch heads, risk officers, relationship managers and compliance — through three role-secured dashboards. It replaces hand-built spreadsheet packs with a single certified source of truth, refreshed daily.</p>
+  <div class="chips">
+    <span class="chip">Power BI Desktop + Service</span><span class="chip">Power Query / M</span>
+    <span class="chip">Star Schema</span><span class="chip">DAX</span><span class="chip">Time Intelligence</span>
+    <span class="chip">RLS</span><span class="chip">Gateways &amp; Refresh</span><span class="chip">Deployment Pipelines</span>
+    <span class="chip">SQL</span>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="v">8</div><div class="l">Headline KPIs</div></div>
+    <div class="kpi"><div class="v">3+4</div><div class="l">Fact + Dim tables</div></div>
+    <div class="kpi"><div class="v">16</div><div class="l">DAX measures</div></div>
+    <div class="kpi warn"><div class="v">4%</div><div class="l">NPA tolerance</div></div>
+  </div>
+  <div class="note teal"><b>The synthetic dataset.</b> Eight CSVs ship with this project — a stand-in for a SQL Server warehouse export: <code class="inline">DimDate</code>, <code class="inline">DimCustomer</code>, <code class="inline">DimProduct</code>, <code class="inline">DimBranch</code>, <code class="inline">FactAccounts</code>, <code class="inline">FactTransactions</code> (60k rows), <code class="inline">FactLoans</code>. Realistic banking attributes: NPA flags, DPD buckets, KYC status, fraud flags, channels.</div>
+</div></section>
+
+<!-- DOCUMENTS -->
+<section id="docs"><div class="wrap prose">
+  <div class="sec-no">02 — The Deliverable Set</div>
+  <h2>Five documents that frame the build</h2>
+  <p class="lead">In a real delivery, the dashboard is only the visible tip. These artifacts are what make you look like a 6-year professional, not a hobbyist.</p>
+  <div class="docgrid">
+    <div class="doc"><div class="tag">Business</div><h4>Project Summary</h4><p>Executive overview: problem, objectives, scope, personas, KPIs, timeline, risks, glossary.</p></div>
+    <div class="doc"><div class="tag">Requirements</div><h4>SSRD</h4><p>System Specification &amp; Requirements: functional + non-functional requirements, data dictionary, acceptance criteria, sign-off.</p></div>
+    <div class="doc"><div class="tag">Technical</div><h4>LLD</h4><p>Low-Level Design: architecture, Power Query steps, relationships, DAX patterns, RLS, deployment, performance.</p></div>
+    <div class="doc"><div class="tag">Quality</div><h4>UAT Document</h4><p>Test approach, 16 test cases, severity model, defect log, traceability matrix, sign-off.</p></div>
+    <div class="doc"><div class="tag">Learning</div><h4>NOTES.md</h4><p>The 10-day curriculum: concept &rarr; why-in-banking &rarr; hands-on &rarr; interview hooks, plus the full question bank.</p></div>
+    <div class="doc"><div class="tag">Reference</div><h4>dax_measures.txt</h4><p>All 16 measures with line-by-line explanations of what, why, and how — paste-ready into Power BI.</p></div>
+  </div>
+</div></section>
+
+<!-- JOURNEY -->
+<section id="journey"><div class="wrap">
+  <div class="sec-no">03 — The 10-Day Journey</div>
+  <h2>From empty canvas to certified dataset</h2>
+  <p class="lead">Click any day to expand. Each maps directly to a job-description skill. Do the work in Power BI yourself — reading is not building.</p>
+  <div class="tl">
+
+    <details class="day" open><summary><span class="dno">DAY 01</span><span class="dt">Domain &amp; Requirements</span><span class="dtag">Stakeholders</span></summary>
+      <div class="body">
+        <p>Learn the BI lifecycle and the banking economics. A bank earns on Net Interest Margin and fees, loses on bad loans. Capture five personas and freeze eight KPIs in writing.</p>
+        <div class="lbl">Hands-on</div>
+        <p>Read the Project Summary &amp; SSRD. For each KPI write the one-sentence business question it answers. Get sign-off before building a single visual.</p>
+        <div class="lbl">Interview hook</div>
+        <p>"Walk me through your BI lifecycle" &rarr; requirements &rarr; sources &rarr; model &rarr; ETL &rarr; measures &rarr; visuals &rarr; security &rarr; deploy &rarr; support.</p>
+      </div>
+    </details>
+
+    <details class="day"><summary><span class="dno">DAY 02</span><span class="dt">Multi-Source Connections</span><span class="dtag">Get Data</span></summary>
+      <div class="body">
+        <p>Connectors + connectivity mode. <b>Import</b> copies data into VertiPaq (fast, scheduled). <b>DirectQuery</b> leaves queries in the source (huge / real-time).</p>
+        <div class="lbl">Banking reality</div>
+        <p>Core banking on SQL Server, customer master in an ERP, KYC exceptions in Excel, FX rates from a REST API, statements in cloud storage. One report stitches them all.</p>
+        <div class="lbl">Hands-on</div>
+        <p>Get Data &rarr; Text/CSV for all 8 files. Optionally Get Data &rarr; Web on a public FX JSON to prove API ingestion.</p>
+        <div class="lbl">Interview hook</div>
+        <p>"Import vs DirectQuery?" &rarr; volume, latency, source load, model size, feature support.</p>
+      </div>
+    </details>
+
+    <details class="day"><summary><span class="dno">DAY 03</span><span class="dt">Power Query: ETL &amp; Cleansing</span><span class="dtag">M Language</span></summary>
+      <div class="body">
+        <p>Power Query (engine = M) is the ETL layer; every action is a step. Preserve <b>query folding</b> so transformations push back to the source as SQL.</p>
+        <div class="lbl">Hands-on (named steps)</div>
+        <pre><span class="c">// Set types FIRST — protects all downstream logic</span>
+<span class="k">DateKey</span> &rarr; Whole Number, <span class="k">Amount</span> &rarr; Decimal, <span class="k">Date</span> &rarr; Date
+Trim / Clean / Proper-case <span class="k">City</span>
+Replace nulls in <span class="k">InterestRate</span> with 0
+Remove duplicates on <span class="k">CustomerID</span>
+Conditional column <span class="k">LoanFlag</span> = if Category = "Loans" then 1 else 0
+Custom column <span class="k">AbsBalance</span> = <span class="f">Number.Abs</span>([Balance])
+Disable load on staging queries</pre>
+        <div class="lbl">Interview hook</div>
+        <p>"What is query folding?" &rarr; source does the work = faster refresh + less memory; verify via <em>View Native Query</em>.</p>
+      </div>
+    </details>
+
+    <details class="day"><summary><span class="dno">DAY 04</span><span class="dt">Data Modeling: Star Schema</span><span class="dtag">Relationships</span></summary>
+      <div class="body">
+        <p>Central fact tables surrounded by descriptive dimensions. Relationships are 1-to-many; filters flow from the one-side to the many-side.</p>
+        <div class="lbl">Hands-on</div>
+        <p>Build relationships from the four dims into the three facts; mark <code class="inline">DimDate</code> as a Date table; hide foreign keys from report view. See the diagram in section 04.</p>
+        <div class="lbl">Interview hook</div>
+        <p>"Star vs snowflake?" &rarr; star = denormalized dims, fewer joins, faster, simpler DAX. "Why a date table?" &rarr; time intelligence needs continuous, marked dates.</p>
+      </div>
+    </details>
+
+    <details class="day"><summary><span class="dno">DAY 05</span><span class="dt">DAX Foundations</span><span class="dtag">Context</span></summary>
+      <div class="body">
+        <p>Two contexts: <b>row</b> (current row, iterators) and <b>filter</b> (slicers in effect). <code class="inline">CALCULATE</code> is the only function that modifies filter context.</p>
+        <p><b>Measure vs calculated column:</b> measures compute at query time (KPIs); columns compute at refresh and are stored (slicing/keys).</p>
+        <div class="lbl">Hands-on</div>
+        <pre><span class="k">Total Deposits</span> =
+  <span class="f">CALCULATE</span>( <span class="f">SUM</span>(FactAccounts[Balance]),
+            DimProduct[ProductCategory] = "Deposits" )
+
+<span class="k">NPA %</span> = <span class="f">DIVIDE</span>( [NPA Amount], [Total Loan Book] )</pre>
+        <div class="lbl">Interview hook</div>
+        <p>"SUM vs SUMX?" &rarr; SUM aggregates a column; SUMX iterates row-by-row evaluating an expression.</p>
+      </div>
+    </details>
+
+    <details class="day"><summary><span class="dno">DAY 06</span><span class="dt">Advanced DAX &amp; Performance</span><span class="dtag">Time Intel</span></summary>
+      <div class="body">
+        <p>Time-intelligence (<code class="inline">TOTALYTD</code>, <code class="inline">SAMEPERIODLASTYEAR</code>, <code class="inline">DATEADD</code>), ranking (<code class="inline">RANKX</code>), and <code class="inline">VAR</code> for readability + speed.</p>
+        <div class="lbl">Hands-on</div>
+        <pre><span class="k">Txn YoY %</span> = <span class="f">DIVIDE</span>( [Total Txn Value] - [Txn Value LY], [Txn Value LY] )
+
+<span class="k">Txn MoM %</span> =
+  <span class="k">VAR</span> Cur  = [Total Txn Value]
+  <span class="k">VAR</span> Prev = <span class="f">CALCULATE</span>([Total Txn Value], <span class="f">DATEADD</span>(DimDate[Date],-1,MONTH))
+  <span class="k">RETURN</span> <span class="f">DIVIDE</span>(Cur - Prev, Prev)</pre>
+        <div class="lbl">Interview hook</div>
+        <p>"Report is slow — fix it?" &rarr; Performance Analyzer &rarr; reduce visuals/cardinality &rarr; measures over columns &rarr; check folding &rarr; star schema.</p>
+      </div>
+    </details>
+
+    <details class="day"><summary><span class="dno">DAY 07</span><span class="dt">Visuals, UX &amp; RLS</span><span class="dtag">Security</span></summary>
+      <div class="body">
+        <p>Three pages: Executive Overview, Loan &amp; Risk, Customer &amp; Channel. KPI cards top, trend middle, detail bottom. Slicers, bookmarks, drillthrough.</p>
+        <div class="lbl">Row-Level Security</div>
+        <p>A Mumbai branch head must see only Mumbai. Dynamic RLS uses a mapping table + <code class="inline">USERPRINCIPALNAME()</code> so one role serves every branch head. Test with <em>View as roles</em>.</p>
+        <pre><span class="c">-- Dynamic RLS filter on DimBranch</span>
+[Region] = <span class="f">LOOKUPVALUE</span>(Map[Region], Map[Email], <span class="f">USERPRINCIPALNAME</span>())</pre>
+        <div class="lbl">Interview hook</div>
+        <p>"Static vs dynamic RLS?" &rarr; static = one role per value (doesn't scale); dynamic = mapping table + USERPRINCIPALNAME(), scales to thousands.</p>
+      </div>
+    </details>
+
+    <details class="day"><summary><span class="dno">DAY 08</span><span class="dt">Scorecards &amp; KPI Visuals</span><span class="dtag">Targets</span></summary>
+      <div class="body">
+        <p>Present KPIs against targets with status. Conditional-format the NPA card red when <code class="inline">[NPA %] &gt; [NPA Target]</code>. Add a what-if parameter for rate scenarios.</p>
+        <div class="lbl">Hands-on</div>
+        <p>Build an Actual / Target / Variance / Status matrix. Use the KPI visual and field-level conditional formatting.</p>
+        <div class="lbl">Interview hook</div>
+        <p>"What is a what-if parameter?" &rarr; a generated table + measure to model scenarios interactively.</p>
+      </div>
+    </details>
+
+    <details class="day"><summary><span class="dno">DAY 09</span><span class="dt">Deploy, Refresh &amp; Support</span><span class="dtag">Operations</span></summary>
+      <div class="body">
+        <p>Publish to a workspace; schedule daily refresh (gateway for on-prem sources); promote Dev &rarr; Test &rarr; Prod with Deployment Pipelines.</p>
+        <div class="lbl">Production runbook</div>
+        <table><tr><th>Incident</th><th>Response</th></tr>
+          <tr><td>Refresh failed</td><td>Gateway online? &rarr; creds? &rarr; source schema change? &rarr; rerun &rarr; notify</td></tr>
+          <tr><td>Wrong number</td><td>Reproduce &rarr; check measure filter context &rarr; reconcile to source &rarr; hotfix in Dev &rarr; promote</td></tr>
+          <tr><td>New KPI request</td><td>Log change request &rarr; estimate &rarr; build in Dev &rarr; UAT &rarr; deploy</td></tr></table>
+        <div class="lbl">Interview hook</div>
+        <p>"Incremental refresh?" &rarr; partition by date with RangeStart/RangeEnd; refresh only recent partitions; needs a folding date filter.</p>
+      </div>
+    </details>
+
+    <details class="day"><summary><span class="dno">DAY 10</span><span class="dt">Governance &amp; Mock Interview</span><span class="dtag">Close</span></summary>
+      <div class="body">
+        <p>Naming standards, measure descriptions, a Certified dataset, sensitivity labels. Polish the pages, export a PDF, push <code class="inline">.pbix</code> + docs to GitHub.</p>
+        <div class="lbl">Hands-on</div>
+        <p>Run the full question bank in section 06 out loud, timed. Prepare your 90-second "tell me about yourself" anchored on this project.</p>
+      </div>
+    </details>
+
+  </div>
+</div></section>
+
+<!-- MODEL -->
+<section id="model"><div class="wrap prose">
+  <div class="sec-no">04 — The Star Schema</div>
+  <h2>How the model fits together</h2>
+  <p class="lead">Four conformed dimensions (teal) feed three fact tables (gold). One date table drives every time-based metric — that is what makes slicing by month, quarter or year consistent everywhere.</p>
+  <div class="model">
+    <div class="tbl dim"><div class="hd">DimDate</div><ul><li class="key">DateKey 🔑</li><li>Date, Month, Quarter</li><li>Year, WeekdayName</li><li>IsWeekend</li></ul></div>
+    <div class="tbl dim"><div class="hd">DimCustomer</div><ul><li class="key">CustomerID 🔑</li><li>Segment, KYCStatus</li><li>City, Gender, DOB</li><li>RelationshipManager</li></ul></div>
+    <div class="tbl dim"><div class="hd">DimProduct</div><ul><li class="key">ProductID 🔑</li><li>ProductName</li><li>ProductCategory</li><li>Segment</li></ul></div>
+    <div class="tbl fact"><div class="hd">FactAccounts</div><ul><li class="key">AccountID 🔑</li><li>Balance, Status</li><li>InterestRate</li><li>FK: Customer/Product/Branch/Date</li></ul></div>
+    <div class="tbl fact"><div class="hd">FactTransactions</div><ul><li class="key">TransactionID 🔑</li><li>Amount, Channel</li><li>TxnType, IsFraudFlag</li><li>FK: Account, Date</li></ul></div>
+    <div class="tbl fact"><div class="hd">FactLoans</div><ul><li class="key">LoanID 🔑</li><li>OutstandingAmount, EMI</li><li>DPD, NPAFlag, Status</li><li>FK: Account/Customer/Product/Date</li></ul></div>
+    <div class="tbl dim"><div class="hd">DimBranch</div><ul><li class="key">BranchID 🔑</li><li>BranchName, City</li><li>Region, State</li></ul></div>
+  </div>
+  <div class="note"><b>Design decisions.</b> No snowflaking (simpler DAX, faster queries). One active relationship between any two tables. <code class="inline">DimDate</code> marked as a date table. Foreign keys hidden from the report field list.</div>
+</div></section>
+
+<!-- DAX -->
+<section id="dax"><div class="wrap prose">
+  <div class="sec-no">05 — The DAX Library</div>
+  <h2>The measures that power every visual</h2>
+  <p class="lead">All 16 measures live in a dedicated <code class="inline">_Measures</code> table. Ratios always use <code class="inline">DIVIDE</code>. Here are the signature ones — the full annotated set is in <code class="inline">dax_measures.txt</code>.</p>
+  <table>
+    <tr><th>KPI</th><th>Pattern</th><th>Why it matters</th></tr>
+    <tr><td>Total Deposits</td><td>CALCULATE(SUM, Category=Deposits)</td><td>Funding base, headline liability</td></tr>
+    <tr><td>Total Loan Book</td><td>SUM(OutstandingAmount)</td><td>Asset side; base for NPA%</td></tr>
+    <tr><td>NPA %</td><td>DIVIDE(NPA Amount, Loan Book)</td><td>Most-watched risk ratio</td></tr>
+    <tr><td>CASA Ratio</td><td>VAR + IN list, DIVIDE</td><td>Low-cost funding = better margin</td></tr>
+    <tr><td>Active Customers</td><td>CALCULATE(DISTINCTCOUNT, Active)</td><td>Engagement / customer health</td></tr>
+    <tr><td>Txn YoY %</td><td>SAMEPERIODLASTYEAR in CALCULATE</td><td>Growth vs last year</td></tr>
+    <tr><td>Txn MoM %</td><td>DATEADD -1 MONTH, VAR, DIVIDE</td><td>Momentum vs last month</td></tr>
+    <tr><td>Branch Rank</td><td>RANKX over ALL(BranchName)</td><td>Performance league table</td></tr>
+  </table>
+  <div class="note teal"><b>The line-by-line rule.</b> Every measure in the reference file is explained — what it does, why it is written that way, the syntax, parameters and logic — so you can defend any of them in an interview, not just paste them.</div>
+</div></section>
+
+<!-- INTERVIEW -->
+<section id="interview"><div class="wrap prose">
+  <div class="sec-no">06 — The Interview</div>
+  <h2>Technical, Managerial &amp; HR — answered</h2>
+  <p class="lead">Click each question to reveal a concise, defensible answer. Rehearse out loud. The full bank lives in NOTES.md.</p>
+
+  <div class="round">
+    <h3><span class="dot" style="background:var(--teal)"></span>A &middot; Technical Round</h3>
+
+    <details class="qa"><summary>Import vs DirectQuery vs Composite — when each?</summary>
+      <div class="ans">Import copies data into VertiPaq: fastest, full DAX, scheduled refresh — the default. DirectQuery leaves queries in the source for very large or near-real-time data, at the cost of speed and some DAX/PQ limits. Composite mixes both, often with aggregations: detail in DirectQuery, summaries imported.</div></details>
+
+    <details class="qa"><summary>Explain row context vs filter context.</summary>
+      <div class="ans">Row context is "the current row" — it exists in calculated columns and inside iterators like SUMX. Filter context is the set of filters applied by slicers, rows/columns of a visual, and CALCULATE. <code class="inline">CALCULATE</code> can convert row context into filter context (context transition), which is why a measure behaves differently inside an iterator.</div></details>
+
+    <details class="qa"><summary>What does CALCULATE do?</summary>
+      <div class="ans">It evaluates an expression in a filter context that you modify with its filter arguments — the only function that changes filter context. Example: <code class="inline">NPA% = DIVIDE(CALCULATE(SUM(Outstanding), NPAFlag=1), [Total Loan Book])</code>.</div></details>
+
+    <details class="qa"><summary>Star vs snowflake schema — and why star?</summary>
+      <div class="ans">Star = denormalized dimensions directly around the facts. Snowflake = dimensions normalized into sub-tables. Star wins in Power BI: fewer joins, better VertiPaq compression, simpler and faster DAX, cleaner relationships.</div></details>
+
+    <details class="qa"><summary>What is query folding and how do you verify it?</summary>
+      <div class="ans">Power Query translates your steps into native source queries (e.g., SQL) so the source does the heavy lifting — faster refresh, less memory. Verify with right-click step &rarr; <em>View Native Query</em>. Steps like adding index columns or certain custom logic can break folding, so do foldable steps first.</div></details>
+
+    <details class="qa"><summary>Measure vs calculated column vs calculated table?</summary>
+      <div class="ans">Measure: computed at query time, no storage, aggregated — use for KPIs. Calculated column: computed at refresh, stored per row — use for slicing or relationships. Calculated table: a DAX-generated table (e.g., a date table or bridge).</div></details>
+
+    <details class="qa"><summary>How do you compute YoY growth?</summary>
+      <div class="ans"><code class="inline">SAMEPERIODLASTYEAR</code> inside CALCULATE gives last year's value; then DIVIDE the difference: <code class="inline">DIVIDE([Value]-[ValueLY],[ValueLY])</code>. Requires a marked date table with continuous dates.</div></details>
+
+    <details class="qa"><summary>ALL vs ALLEXCEPT vs REMOVEFILTERS vs ALLSELECTED?</summary>
+      <div class="ans">ALL removes all filters from a table/column. ALLEXCEPT removes all except the columns you list. REMOVEFILTERS is the clearer modern alias for ALL used as a CALCULATE modifier. ALLSELECTED respects the user's outer selections (slicers) while ignoring inner visual filters — useful for % of visible total.</div></details>
+
+    <details class="qa"><summary>Static vs dynamic RLS?</summary>
+      <div class="ans">Static = a role per filter value (Region="West") — simple but doesn't scale. Dynamic = a user-to-attribute mapping table filtered by <code class="inline">USERPRINCIPALNAME()</code>, so one role serves everyone. Roles are defined in Desktop; members are assigned in the Service; admins bypass RLS by default.</div></details>
+
+    <details class="qa"><summary>A report is slow — how do you fix it?</summary>
+      <div class="ans">Use Performance Analyzer to find the slow visual and its DAX duration. Common fixes: fewer visuals per page, lower cardinality, measures instead of calculated columns, boolean column filters instead of FILTER(table), restore query folding, enforce a star schema, and consider aggregations/composite models for big data.</div></details>
+
+    <details class="qa"><summary>SQL: top 5 branches by transaction value?</summary>
+      <div class="ans"><code class="inline">SELECT b.BranchName, SUM(t.Amount) v FROM FactTransactions t JOIN FactAccounts a ON t.AccountID=a.AccountID JOIN DimBranch b ON a.BranchID=b.BranchID GROUP BY b.BranchName ORDER BY v DESC LIMIT 5;</code> Know WHERE (pre-aggregation) vs HAVING (post-aggregation) and window functions like ROW_NUMBER/RANK.</div></details>
+
+    <details class="qa"><summary>What is incremental refresh?</summary>
+      <div class="ans">Partition a large fact table by date using RangeStart/RangeEnd parameters; Power BI refreshes only recent partitions instead of the whole table. The date filter must fold to the source. Dramatically cuts refresh time and load.</div></details>
+  </div>
+
+  <div class="round">
+    <h3><span class="dot" style="background:var(--gold)"></span>B &middot; Managerial / Project Round</h3>
+
+    <details class="qa"><summary>Walk me through a Power BI project end-to-end.</summary>
+      <div class="ans">Use BankSphere 360: stakeholder workshops &rarr; five personas, eight KPIs frozen in an SSRD &rarr; profile SQL/ERP/Excel sources &rarr; Power Query ETL preserving folding &rarr; star schema with conformed dims &rarr; DAX KPIs incl. time intelligence &rarr; three pages with drillthrough &amp; bookmarks &rarr; dynamic RLS &rarr; publish with gateway + scheduled refresh &rarr; deployment pipelines &rarr; runbook. Result: one certified source of truth, reporting effort cut from days to minutes.</div></details>
+
+    <details class="qa"><summary>How do you gather requirements and handle scope creep?</summary>
+      <div class="ans">Persona workshops, written KPI definitions signed off in the SSRD, and a mock-up before building. New asks become logged change requests, estimated and prioritized — not silent additions. The signed KPI definitions are the anchor when scope drifts.</div></details>
+
+    <details class="qa"><summary>A stakeholder disputes a number — what do you do?</summary>
+      <div class="ans">Stay calm and reproduce it. Check the measure's filter context, trace it back through the model, and reconcile against the source control totals. If the model is right, walk them through the definition; if it's wrong, hotfix in Dev, retest, and promote. Trust comes from transparency, not defensiveness.</div></details>
+
+    <details class="qa"><summary>How do you prioritize three teams wanting changes the same week?</summary>
+      <div class="ans">Impact vs effort, against business value and risk. Regulatory/risk items (NPA accuracy) outrank cosmetic ones. I make the queue visible, communicate timelines, and batch low-effort items together.</div></details>
+
+    <details class="qa"><summary>Describe a performance problem you solved.</summary>
+      <div class="ans">Frame it concretely: a page loaded slowly; Performance Analyzer pointed to a high-cardinality calculated column and a FILTER over a whole fact table. I moved the logic to a measure with boolean filters, reduced cardinality, and confirmed folding — load time dropped materially. Always quantify the before/after.</div></details>
+  </div>
+
+  <div class="round">
+    <h3><span class="dot" style="background:var(--red)"></span>C &middot; HR Round</h3>
+
+    <details class="qa"><summary>Tell me about yourself.</summary>
+      <div class="ans">A 90-second arc: years in BI and data, banking-domain depth, a signature project (BankSphere 360), the measurable value delivered, and where you want to grow (modern data/AI alongside BI). End forward-looking, tied to this role.</div></details>
+
+    <details class="qa"><summary>Why are you looking for a change?</summary>
+      <div class="ans">Frame toward growth, never away from negativity: you want broader ownership of end-to-end BI and to deepen modern data/cloud skills, which this role offers. Keep it positive and specific.</div></details>
+
+    <details class="qa"><summary>What are your strengths and weaknesses?</summary>
+      <div class="ans">Strength: translating fuzzy business questions into governed, performant models (evidence it). Weakness: pick a real, improving one — e.g., earlier you over-engineered before validating requirements, and now you mock up and confirm KPIs first. Show the correction.</div></details>
+
+    <details class="qa"><summary>Salary expectations?</summary>
+      <div class="ans">Give a researched range anchored to market and your seniority, signal flexibility for the right overall package, and turn it into a conversation rather than a single number. Do the market research beforehand for the specific city/role.</div></details>
+
+    <details class="qa"><summary>Do you have questions for us?</summary>
+      <div class="ans">Always yes. Ask about the team structure, the organization's data maturity and tooling, and what success in this role looks like at the 6-month mark. It shows you think like an owner.</div></details>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="mark">BankSphere<b>360</b></div>
+  <p>One real-world banking build, every Power BI skill, three interview rounds. Now go open Power BI Desktop and build it yourself — that is where the learning actually happens.</p>
+</div></footer>
+
+<script>
+  // scroll progress
+  const prog=document.getElementById('prog');
+  addEventListener('scroll',()=>{const h=document.documentElement;
+    const s=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100;prog.style.width=s+'%';});
+  // smooth-active nav handled by browser; accordions are native <details>
+</script>
+</body>
+</html>

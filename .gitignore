@@ -1,0 +1,16 @@
+# Power BI cache and temp files
+.pbi/
+*.abf
+cache.abf
+*.tmp
+ 
+# Local PBIX (we use PBIP for version control)
+*.pbix
+ 
+# OS files
+.DS_Store
+Thumbs.db
+ 
+# Editor files
+.vscode/
+*.swp

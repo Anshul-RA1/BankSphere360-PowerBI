@@ -1,0 +1,209 @@
+table _Measures
+	lineageTag: 361bb614-d567-4c39-9768-0326dcfc786d
+
+	/// Sum of account balances for deposit products only (Savings Account, Current Account, Fixed Deposit). Excludes loans, cards and wealth products.
+	measure 'Total Deposits' =
+			CALCULATE(
+			    sum(
+			        FactAccounts[Balance]
+			    ),
+			    DimProduct[ProductCategory]="Deposits"
+			
+			)
+		formatString: "₹"\ #,0;#,0\ -"₹";"₹"\ #,0
+		lineageTag: ed549b11-cf0c-4426-89f7-c9af714881d4
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-IN"}
+
+	/// Total outstanding principal across all loans — what customers currently owe. Used as denominator for NPA%. Not the same as Total Sanctioned (original loan amount).
+	measure 'Total Loan Book' = ```
+			sum(FactLoans[OutstandingAmount]) 
+			```
+		formatString: "₹"\ #,0;#,0\ -"₹";"₹"\ #,0
+		lineageTag: 4e02c1f8-f6ab-4f07-8812-edeb554b0c6e
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-IN"}
+
+	/// Total original loan amount approved and disbursed across all loans. Always >= Total Loan Book since customers repay over time.
+	measure 'Total Sanctioned' = ```
+			sum(FactLoans[SanctionAmount]) 
+			```
+		formatString: "₹"\ #,0;#,0\ -"₹";"₹"\ #,0
+		lineageTag: 7fef09a1-ad8f-48eb-978a-f122c1e4577f
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-IN"}
+
+	/// Outstanding principal in Non-Performing Assets (loans with NPA Flag=1, i.e. 90+ Days Past Due). Subset of Total Loan Book.
+	measure 'NPA Amount' = ```
+			CALCULATE(
+			    sum(FactLoans[OutstandingAmount]),
+			    FactLoans[NPAFlag] = 1
+			) 
+			```
+		formatString: "₹"\ #,0;#,0\ -"₹";"₹"\ #,0
+		lineageTag: 05872b4c-b5c5-4d42-af2e-510e92bc7f69
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-IN"}
+
+	/// Non-Performing Asset ratio. NPA Amount divided by Total Loan Book. Board tolerance is 4%. Values above 4% trigger red conditional formatting.
+	measure 'NPA %' = ```
+			DIVIDE(
+			    [NPA Amount], 
+			    [Total Loan Book]
+			    ) 
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 115235df-6ffd-40e6-b571-d8b52f5ab008
+
+	/// Count of distinct customers holding at least one Active account. Uses DISTINCTCOUNT to count each customer once regardless of how many accounts they hold.
+	measure 'Active Customers' =
+			
+			CALCULATE (
+			    DISTINCTCOUNT ( FactAccounts[CustomerID] ),
+			    FactAccounts[Status] = "Active"
+			)
+		formatString: #,0
+		lineageTag: 61eb998c-eacb-49dd-9df5-b218543cae06
+
+	/// Current Account Savings Account ratio. Share of deposits held in low-cost Savings and Current accounts vs total deposits. Industry benchmark 40%+. Higher = better margin.
+	measure 'CASA Ratio' = ```
+			
+			 VAR CASA = 
+			 CALCULATE(
+			    [Total Deposits],
+			    DimProduct[ProductName] in {"Savings Account", "Current Account"}
+			 )
+			 RETURN
+			 DIVIDE(CASA , [Total Deposits])
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 8f36a633-ac66-4ba3-9054-bbac7a30d498
+
+	/// Sum of all transaction amounts in the current filter context. Base measure for time-intelligence measures (YoY, MoM, YTD).
+	measure 'Total Txn Value' = ```
+			sum(FactTransactions[Amount]) 
+			```
+		formatString: "₹"\ #,0;#,0\ -"₹";"₹"\ #,0
+		lineageTag: b9758982-2dbb-4888-9378-e88467817bfc
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-IN"}
+
+	/// Count of transaction rows (COUNTROWS). Represents volume of activity. Reconciles to 60,000 rows in the source.
+	measure 'Total Transactions' = ```
+			COUNTROWS(FactTransactions) 
+			```
+		formatString: #,0
+		lineageTag: 039e8cbc-5405-4fb4-9e30-4b6e83d483ac
+
+	/// Cumulative Total Deposits from January 1st to the last date in the current filter context. Resets at the start of each year. Requires marked DimDate table.
+	measure 'Deposits YTD' = TOTALYTD([Total Deposits], DimDate[Date])
+		formatString: "₹"\ #,0;#,0\ -"₹";"₹"\ #,0
+		lineageTag: 50b76cdb-c749-477e-842b-9ee93e6d37dc
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-IN"}
+
+	/// Total Txn Value for the same period one year earlier. Uses SAMEPERIODLASTYEAR — a table function that shifts the active date filter back 12 months. Building block for Txn YoY%.
+	measure 'TXN Value LY' = ```
+			CALCULATE(
+			    [Total Txn Value],
+			    SAMEPERIODLASTYEAR(DimDate[Date])
+			) 
+			```
+		formatString: "₹"\ #,0;#,0\ -"₹";"₹"\ #,0
+		lineageTag: c5aa0d57-688c-4ad4-bc81-4e3652d4b160
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-IN"}
+
+	/// Year-over-year growth in transaction value. (Current period - Last year) / Last year. Blank when no prior year data is available in context.
+	measure 'Txn YoY%' =
+			DIVIDE(
+			    [Total Txn Value] - [TXN Value LY],
+			    [TXN Value LY]
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 8a8584f7-bded-4837-aa27-d63daeff2efe
+
+	/// Month-over-month growth in transaction value. Uses DATEADD(-1, MONTH) to shift the current filter back one month. Uses VAR for readability and single evaluation.
+	measure 'Txn MoM %' =
+			
+			VAR CurrentVal = [Total Txn Value]
+			VAR PrevVal =
+			    CALCULATE (
+			        [Total Txn Value],
+			        DATEADD ( DimDate[Date], -1, MONTH )
+			    )
+			RETURN
+			    DIVIDE ( CurrentVal - PrevVal, PrevVal )
+		lineageTag: deb29e91-cf28-4dce-832c-de8061377fd0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Ranks branches 1 to N by Total Txn Value descending. Uses RANKX over ALL(DimBranch[BranchName]) so every branch is ranked even if filtered. Rank 1 = highest transaction value.
+	measure 'Branch Rank' = ```
+			RANKX(
+			    all(DimBranch[BranchName]),
+			    [Total Txn Value],
+			    ,
+			    DESC
+			) 
+			```
+		formatString: 0
+		lineageTag: b15794f9-fd4f-4f6a-af8e-139e4a7e04f1
+
+	/// Total transaction value for transactions flagged as suspected fraud (IsFraudFlag=1). Approximately 0.4% of transactions by design. Feeds Compliance persona page.
+	measure 'Fraud Flagged Value' = ```
+			CALCULATE(
+			    [Total Txn Value],
+			    FactTransactions[IsFraudFlag] = 1
+			)  
+			```
+		formatString: "₹"\ #,0;#,0\ -"₹";"₹"\ #,0
+		lineageTag: 675999af-5c14-4930-b2a7-8bd0801dc342
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-IN"}
+
+	/// Board-approved NPA% tolerance = 4% (stored as 0.04). Used in conditional formatting (NPA% card turns red above this threshold) and the KPI scorecard.
+	measure 'NPA Target' = 0.04
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 006c2daf-064e-4c8e-8c27-1222aa8a5971
+
+	/// Industry benchmark for CASA Ratio = 40% (stored as 0.40). Used in KPI scorecard.
+	measure 'CASA Target' = 0.40
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: e897870f-4f46-42ab-8871-e56426351c3c
+
+	/// Text status measure. Returns "⚠️ At Risk" if NPA% > NPA Target, else "✅ Within Target". Used in KPI scorecard matrix with conditional background coloring.
+	measure 'NPA Status' =
+			
+			IF ( [NPA %] > [NPA Target], "⚠️ At Risk", "✅ Within Target" )
+		lineageTag: e5d290a9-ffa0-4aad-8d1b-9f4478a3fbdb
+
+	/// Text status measure. Returns "✅ Good" if CASA Ratio >= CASA Target, else "⚠️ Below Target". Used in KPI scorecard matrix.
+	measure 'CASA Status' =
+			
+			IF ( [CASA Ratio] >= [CASA Target], "✅ Good", "⚠️ Below Target" )
+		lineageTag: ccb2861e-e67a-48b4-8309-acddbb45e098
+
+	/// Net Interest Margin estimator. Total Deposits multiplied by the Interest Rate Scenario slider value divided by 100. Updates in real time as user drags the what-if parameter slider
+	measure 'NIM Scenario' =
+			
+			DIVIDE (
+			    [Total Deposits] * [Interest Rate Scenario Value],
+			    100
+			)
+		formatString: "₹"\ #,0;#,0\ -"₹";"₹"\ #,0
+		lineageTag: aad21e5e-d964-4875-bc3a-f4b3edf6a709
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-IN"}
+
+	partition _Measures = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t]),
+				    #"Removed Columns" = Table.RemoveColumns(Source,{"Column1"})
+				in
+				    #"Removed Columns"
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,102 @@
+table FactAccounts
+	lineageTag: 2dfe42f7-371c-4308-91c9-133d82280ed2
+
+	column AccountID
+		dataType: int64
+		formatString: 0
+		lineageTag: 18e07766-8019-4ffa-b0da-02815097443d
+		summarizeBy: none
+		sourceColumn: AccountID
+
+		annotation SummarizationSetBy = Automatic
+
+	column CustomerID
+		dataType: int64
+		formatString: 0
+		lineageTag: 75d8574c-933e-4758-9e34-6b05a0bc4c07
+		summarizeBy: none
+		sourceColumn: CustomerID
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductID
+		dataType: int64
+		formatString: 0
+		lineageTag: 2625bbbc-cb64-49a2-bac2-11625af7a24f
+		summarizeBy: none
+		sourceColumn: ProductID
+
+		annotation SummarizationSetBy = Automatic
+
+	column BranchID
+		dataType: int64
+		formatString: 0
+		lineageTag: 6b0dfc91-86a9-4da6-9c92-f32a321669c1
+		summarizeBy: none
+		sourceColumn: BranchID
+
+		annotation SummarizationSetBy = Automatic
+
+	column OpenDateKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 82068172-7c32-47d8-a59e-0b1727ee2837
+		summarizeBy: count
+		sourceColumn: OpenDateKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column Balance
+		dataType: double
+		lineageTag: 581798e2-b7a2-4b12-a6c0-acbf6240f596
+		summarizeBy: sum
+		sourceColumn: Balance
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Status
+		dataType: string
+		lineageTag: 1e87b842-8800-4888-bbce-d64d87982224
+		summarizeBy: none
+		sourceColumn: Status
+
+		annotation SummarizationSetBy = Automatic
+
+	column InterestRate
+		dataType: double
+		lineageTag: 3048803d-b5b8-4846-9c76-c1819e362611
+		summarizeBy: sum
+		sourceColumn: InterestRate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AbsBalance
+		dataType: double
+		lineageTag: 5330e14a-2f32-4048-93eb-1d166073cc31
+		summarizeBy: sum
+		sourceColumn: AbsBalance
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition FactAccounts = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\HP\Desktop\01_DATA_ANALYTICS_POWERBI\bankspere360\data\FactAccounts.csv"),[Delimiter=",", Columns=8, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Use First Row as Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Change Type" = Table.TransformColumnTypes(#"Use First Row as Headers",{{"AccountID", Int64.Type}, {"CustomerID", Int64.Type}, {"ProductID", Int64.Type}, {"BranchID", Int64.Type}, {"OpenDateKey", Int64.Type}, {"Balance", type number}, {"Status", type text}, {"InterestRate", type number}}),
+				    #"Added Custom" = Table.AddColumn(#"Change Type", "AbsBalance", each Number.Abs([Balance])),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Added Custom",{{"AbsBalance", type number}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,32 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["DimDate","DimBranch","DimCustomer","DimProduct","FactAccounts","FactLoans","FactTransactions","_Measures","UserRegionMap"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table DimDate
+ref table DateTableTemplate_256e081e-7b46-4f24-9dc0-c876162cd131
+ref table DimBranch
+ref table DimCustomer
+ref table LocalDateTable_217bea0d-a4d8-42ef-991f-4c09bf4f4311
+ref table LocalDateTable_8487eefc-c76c-4935-83fd-037b1837c481
+ref table DimProduct
+ref table FactAccounts
+ref table FactLoans
+ref table FactTransactions
+ref table _Measures
+ref table UserRegionMap
+ref table 'Interest Rate Scenario'
+
+ref role BranchHead
+
+ref cultureInfo en-US
+

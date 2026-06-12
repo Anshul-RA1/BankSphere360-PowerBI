@@ -1,0 +1,142 @@
+table FactLoans
+	lineageTag: fda4b528-14ce-4daa-8d2d-562627b11409
+
+	column LoanID
+		dataType: int64
+		formatString: 0
+		lineageTag: c0f4e25d-f80d-432a-b5be-47275b8b826a
+		summarizeBy: count
+		sourceColumn: LoanID
+
+		annotation SummarizationSetBy = Automatic
+
+	column AccountID
+		dataType: int64
+		formatString: 0
+		lineageTag: 549b1d93-a725-4942-ac31-efc9dd1e7608
+		summarizeBy: count
+		sourceColumn: AccountID
+
+		annotation SummarizationSetBy = Automatic
+
+	column CustomerID
+		dataType: int64
+		formatString: 0
+		lineageTag: 1f13a520-f57a-49f6-9a07-74517a4dc0d0
+		summarizeBy: none
+		sourceColumn: CustomerID
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductID
+		dataType: int64
+		formatString: 0
+		lineageTag: d0a394d2-d0fe-4ef4-86f4-2216aa4c3798
+		summarizeBy: none
+		sourceColumn: ProductID
+
+		annotation SummarizationSetBy = Automatic
+
+	column SanctionDateKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 174d18f6-65fe-4b68-a40f-2dafea9c9a6c
+		summarizeBy: count
+		sourceColumn: SanctionDateKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column SanctionAmount
+		dataType: double
+		lineageTag: 57d75385-d01b-45d5-b8ee-0b9ebce16e79
+		summarizeBy: sum
+		sourceColumn: SanctionAmount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column OutstandingAmount
+		dataType: double
+		lineageTag: 264cc547-3c1d-43e9-b4e2-5c896deba35d
+		summarizeBy: sum
+		sourceColumn: OutstandingAmount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column EMIAmount
+		dataType: double
+		lineageTag: 8dcad562-cd24-4e88-8576-e61747281e86
+		summarizeBy: sum
+		sourceColumn: EMIAmount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column DPD
+		dataType: int64
+		formatString: 0
+		lineageTag: dcdc4b4f-4085-4b65-8a82-ae0151bb255c
+		summarizeBy: sum
+		sourceColumn: DPD
+
+		annotation SummarizationSetBy = Automatic
+
+	column NPAFlag
+		dataType: int64
+		formatString: 0
+		lineageTag: 90a595b9-148d-4c4c-8de2-593e457475dd
+		summarizeBy: sum
+		sourceColumn: NPAFlag
+
+		annotation SummarizationSetBy = Automatic
+
+	column Status
+		dataType: string
+		lineageTag: 5d574d49-0596-4ff8-89fc-aaaf46c42494
+		summarizeBy: none
+		sourceColumn: Status
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DPD Bucket'
+		dataType: string
+		lineageTag: b8ff02f0-7bd2-44c2-8dd6-3e4e17f2862e
+		summarizeBy: none
+		sourceColumn: DPD Bucket
+		sortByColumn: 'DPD Bucket Order'
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DPD Bucket Order'
+		dataType: int64
+		formatString: 0
+		lineageTag: f728e212-826f-4b1d-8aa7-7ea2c8badd94
+		summarizeBy: sum
+		sourceColumn: DPD Bucket Order
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FactLoans = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\HP\Desktop\01_DATA_ANALYTICS_POWERBI\bankspere360\data\FactLoans.csv"),[Delimiter=",", Columns=11, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"LoanID", Int64.Type}, {"AccountID", Int64.Type}, {"CustomerID", Int64.Type}, {"ProductID", Int64.Type}, {"SanctionDateKey", Int64.Type}, {"SanctionAmount", type number}, {"OutstandingAmount", type number}, {"EMIAmount", type number}, {"DPD", Int64.Type}, {"NPAFlag", Int64.Type}}),
+				    #"Added Conditional Column" = Table.AddColumn(#"Changed Type", "DPD Bucket", each if [DPD] = 0 then "Current (0 DPD)" else if [DPD] < 30 then "Watch (1-30 DPD)" else if [DPD] < 60 then "Substandard (31-60 DPD)" else if [DPD] <= 89 then "Doubtful (61-90 DPD)" else "Loss / NPA (90+ DPD)"),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Added Conditional Column",{{"DPD Bucket", type text}}),
+				    #"Added Conditional Column1" = Table.AddColumn(#"Changed Type1", "DPD Bucket Order", each if [DPD Bucket] = "Current (0 DPD)" then 1 else if [DPD Bucket] = "Watch (1-30 DPD)" then 2 else if [DPD Bucket] = "Substandard (31-60 DPD)" then 3 else if [DPD Bucket] = "Doubtful (61-90 DPD)" then 4 else if [DPD Bucket] = "Loss / NPA (90+ DPD)" then 5 else 99),
+				    #"Changed Type2" = Table.TransformColumnTypes(#"Added Conditional Column1",{{"DPD Bucket Order", Int64.Type}})
+				in
+				    #"Changed Type2"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

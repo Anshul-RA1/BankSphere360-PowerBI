@@ -1,0 +1,48 @@
+relationship e42e9217-e3a2-4855-b435-4b75b463198a
+	joinOnDateBehavior: datePartOnly
+	fromColumn: DimCustomer.DOB
+	toColumn: LocalDateTable_217bea0d-a4d8-42ef-991f-4c09bf4f4311.Date
+
+relationship 49674e0e-2c8b-4c06-9368-bd5062cec9fa
+	joinOnDateBehavior: datePartOnly
+	fromColumn: DimCustomer.OnboardDate
+	toColumn: LocalDateTable_8487eefc-c76c-4935-83fd-037b1837c481.Date
+
+relationship AutoDetected_1083f0e3-db0b-4456-86e7-73d2ee476505
+	fromColumn: FactAccounts.BranchID
+	toColumn: DimBranch.BranchID
+
+relationship AutoDetected_73ae0858-d7b0-4637-ac7e-17b8f8a06dc6
+	fromColumn: FactAccounts.CustomerID
+	toColumn: DimCustomer.CustomerID
+
+relationship AutoDetected_d61885b0-b04d-4976-bb96-b1e3849b6ba1
+	fromColumn: FactAccounts.ProductID
+	toColumn: DimProduct.ProductID
+
+relationship AutoDetected_bdc5b2ea-cba1-48cc-8c2a-ad3cc1c577de
+	fromColumn: FactTransactions.DateKey
+	toColumn: DimDate.DateKey
+
+relationship AutoDetected_e3eb0f2f-fd80-456b-8bce-e284a0fa2645
+	fromColumn: FactLoans.CustomerID
+	toColumn: DimCustomer.CustomerID
+
+relationship AutoDetected_ce8000d8-27a6-4067-92f2-0bef16342b1f
+	fromColumn: FactLoans.ProductID
+	toColumn: DimProduct.ProductID
+
+relationship AutoDetected_4d64e394-0464-48ed-9eac-1994ef6efdc1
+	fromColumn: FactTransactions.AccountID
+	toColumn: FactAccounts.AccountID
+
+relationship b25cfc5c-af41-bd97-e8c2-a79d5f8c66f7
+	isActive: false
+	fromColumn: FactAccounts.OpenDateKey
+	toColumn: DimDate.DateKey
+
+relationship 872ed2cb-2374-37ef-1045-51f35b0835c4
+	isActive: false
+	fromColumn: FactLoans.SanctionDateKey
+	toColumn: DimDate.DateKey
+

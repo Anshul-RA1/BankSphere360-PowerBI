@@ -1,0 +1,50 @@
+table DimProduct
+	lineageTag: 6521f7a5-b290-4982-85a6-bf81c4819fda
+
+	column ProductID
+		dataType: int64
+		formatString: 0
+		lineageTag: b6c60a8e-b504-4967-bb00-0c7de4996ca9
+		summarizeBy: none
+		sourceColumn: ProductID
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductName
+		dataType: string
+		lineageTag: 103afb83-d387-4a43-9fa1-65637e59c2bc
+		summarizeBy: none
+		sourceColumn: ProductName
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductCategory
+		dataType: string
+		lineageTag: 6c961f1a-9fc5-4a07-940c-4eb53cb6cb5c
+		summarizeBy: none
+		sourceColumn: ProductCategory
+
+		annotation SummarizationSetBy = Automatic
+
+	column Segment
+		dataType: string
+		lineageTag: 9b5dde52-98f8-4cfb-ad55-95622c1c2a83
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimProduct = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\HP\Desktop\01_DATA_ANALYTICS_POWERBI\bankspere360\data\DimProduct.csv"),[Delimiter=",", Columns=4, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"ProductID", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

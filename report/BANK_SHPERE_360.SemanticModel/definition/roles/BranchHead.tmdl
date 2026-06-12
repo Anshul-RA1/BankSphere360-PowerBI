@@ -1,0 +1,12 @@
+role BranchHead
+	modelPermission: read
+
+	tablePermission DimBranch =
+			[Region] = LOOKUPVALUE(
+			    UserRegionMap[Region],
+			    UserRegionMap[Email],
+			    USERPRINCIPALNAME()
+			)
+
+	annotation PBI_Id = 289e635199434e70afcd11065506b4bd
+

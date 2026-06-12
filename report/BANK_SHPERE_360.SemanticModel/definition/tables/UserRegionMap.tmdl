@@ -1,0 +1,29 @@
+table UserRegionMap
+	lineageTag: c48e4390-26a9-4732-a5e5-48b104a7d727
+
+	column Email
+		dataType: string
+		lineageTag: 44bc4584-2dd8-4e8b-a30d-d1184ce5a8a7
+		summarizeBy: none
+		sourceColumn: Email
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: 07fd4fcd-b2dd-4b9f-83bc-9adb88cf8489
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	partition UserRegionMap = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WKk8tLtHLSE1McUhKzMvWS87PVdJRCgcKKsXqRCvl5ReVZGBI+4FEwfLF+aVY5INBomD51EQsprsmgkyPBQA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Email = _t, Region = _t])
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

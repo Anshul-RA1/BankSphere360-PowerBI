@@ -1,0 +1,58 @@
+table DimBranch
+	lineageTag: 6300c0e2-f249-4ed9-8f95-0542ab456a5e
+
+	column BranchID
+		dataType: int64
+		formatString: 0
+		lineageTag: 716cad3b-e740-402c-b343-a79086621898
+		summarizeBy: none
+		sourceColumn: BranchID
+
+		annotation SummarizationSetBy = Automatic
+
+	column BranchName
+		dataType: string
+		lineageTag: 93a97c8d-f347-44a0-b1a7-6116a7a742fa
+		summarizeBy: none
+		sourceColumn: BranchName
+
+		annotation SummarizationSetBy = Automatic
+
+	column City
+		dataType: string
+		lineageTag: 5d877452-45a6-4af6-82d8-1d9d114ecfd5
+		summarizeBy: none
+		sourceColumn: City
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: 7ad1f48d-d2e7-4423-90ca-383a4fab9cc2
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column State
+		dataType: string
+		lineageTag: 97036571-7a65-453b-84d3-d9033f64b682
+		summarizeBy: none
+		sourceColumn: State
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimBranch = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\HP\Desktop\01_DATA_ANALYTICS_POWERBI\bankspere360\data\DimBranch.csv"),[Delimiter=",", Columns=5, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"BranchID", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

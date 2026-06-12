@@ -1,0 +1,28 @@
+table 'Interest Rate Scenario'
+	lineageTag: b7a076ca-3a9d-4894-9151-8714efe9260e
+
+	measure 'Interest Rate Scenario Value' = SELECTEDVALUE('Interest Rate Scenario'[Interest Rate Scenario], 10)
+		lineageTag: 3ed18293-81fe-4b9d-aa13-abba99624e0c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Interest Rate Scenario'
+		lineageTag: ca4c3351-58aa-4c51-add3-9369a8b4c4e4
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition 'Interest Rate Scenario' = calculated
+		mode: import
+		source = GENERATESERIES(5, 20, 0.5)
+
+	annotation PBI_Id = 6811a93bd42547d0ac1e801cfd975903
+

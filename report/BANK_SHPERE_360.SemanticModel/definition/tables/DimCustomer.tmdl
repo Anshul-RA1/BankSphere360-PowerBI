@@ -1,0 +1,110 @@
+table DimCustomer
+	lineageTag: f30121a6-1268-4e86-bf91-99763d0210e9
+
+	column CustomerID
+		dataType: int64
+		formatString: 0
+		lineageTag: cd5ff31b-e4ef-4beb-8c6f-0a00251a7f35
+		summarizeBy: none
+		sourceColumn: CustomerID
+
+		annotation SummarizationSetBy = Automatic
+
+	column CustomerName
+		dataType: string
+		lineageTag: 7e9be4ae-28c4-40e7-8379-73843ae76057
+		summarizeBy: none
+		sourceColumn: CustomerName
+
+		annotation SummarizationSetBy = Automatic
+
+	column Gender
+		dataType: string
+		lineageTag: 4f169a5e-ae73-4611-8db5-909d5bb61cef
+		summarizeBy: none
+		sourceColumn: Gender
+
+		annotation SummarizationSetBy = Automatic
+
+	column DOB
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: a68e741d-2024-46e9-b927-b12680d32890
+		summarizeBy: none
+		sourceColumn: DOB
+
+		variation Variation
+			isDefault
+			relationship: e42e9217-e3a2-4855-b435-4b75b463198a
+			defaultHierarchy: LocalDateTable_217bea0d-a4d8-42ef-991f-4c09bf4f4311.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column City
+		dataType: string
+		lineageTag: 2b27319a-a681-4410-b7ec-7ea6bf8c9204
+		summarizeBy: none
+		sourceColumn: City
+
+		annotation SummarizationSetBy = Automatic
+
+	column Segment
+		dataType: string
+		lineageTag: bae2e917-ab34-4c0a-98d2-895742ff4b8b
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column KYCStatus
+		dataType: string
+		lineageTag: df2af5f5-8b4d-41fe-abe8-75d55618da32
+		summarizeBy: none
+		sourceColumn: KYCStatus
+
+		annotation SummarizationSetBy = Automatic
+
+	column RelationshipManager
+		dataType: string
+		lineageTag: 56e36d82-ac9a-43d9-92ea-6c7f251aaaef
+		summarizeBy: none
+		sourceColumn: RelationshipManager
+
+		annotation SummarizationSetBy = Automatic
+
+	column OnboardDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 0d25d4c4-9bf2-491e-b657-19a1bcd60947
+		summarizeBy: none
+		sourceColumn: OnboardDate
+
+		variation Variation
+			isDefault
+			relationship: 49674e0e-2c8b-4c06-9368-bd5062cec9fa
+			defaultHierarchy: LocalDateTable_8487eefc-c76c-4935-83fd-037b1837c481.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition DimCustomer = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\HP\Desktop\01_DATA_ANALYTICS_POWERBI\bankspere360\data\DimCustomer.csv"),[Delimiter=",", Columns=9, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"CustomerID", Int64.Type}, {"DOB", type date}, {"OnboardDate", type date}}),
+				    #"Removed Duplicates" = Table.Distinct(#"Changed Type", {"CustomerID"}),
+				    #"Trimmed Text" = Table.TransformColumns(#"Removed Duplicates",{{"City", Text.Trim, type text}}),
+				    #"Cleaned Text" = Table.TransformColumns(#"Trimmed Text",{{"City", Text.Clean, type text}}),
+				    #"Capitalized Each Word" = Table.TransformColumns(#"Cleaned Text",{{"City", Text.Proper, type text}})
+				in
+				    #"Capitalized Each Word"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

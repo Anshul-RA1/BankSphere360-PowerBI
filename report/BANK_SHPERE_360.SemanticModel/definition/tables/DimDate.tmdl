@@ -1,0 +1,105 @@
+table DimDate
+	lineageTag: 07b01b86-4688-44f0-b2e0-448bd8805444
+	dataCategory: Time
+
+	column DateKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 1c4c3efb-115b-4771-a159-fefae739b68a
+		summarizeBy: none
+		sourceColumn: DateKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: Long Date
+		lineageTag: c7f85b98-9c21-4cca-97c4-cb9a0d7a27a9
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Day
+		dataType: int64
+		formatString: 0
+		lineageTag: 0e02e64d-89f2-4969-b30a-f4aad1f62195
+		summarizeBy: sum
+		sourceColumn: Day
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		dataType: int64
+		formatString: 0
+		lineageTag: 13b0f732-f6ba-4140-9d43-dd7934e20538
+		summarizeBy: sum
+		sourceColumn: Month
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthName
+		dataType: string
+		lineageTag: 1cf6f510-3387-47a5-81e8-fa0ab722ebae
+		summarizeBy: none
+		sourceColumn: MonthName
+		sortByColumn: Month
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: dde6cd05-9b1a-4b63-9202-a85d32a09e88
+		summarizeBy: sum
+		sourceColumn: Quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 8968f483-1cde-4829-9f82-ad2a8316f267
+		summarizeBy: sum
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeekdayName
+		dataType: string
+		lineageTag: 4f8723b6-6ce2-4903-8192-1b123132b3db
+		summarizeBy: none
+		sourceColumn: WeekdayName
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsWeekend
+		dataType: int64
+		formatString: 0
+		lineageTag: ab403fd9-c672-43de-9c10-35504e623e26
+		summarizeBy: sum
+		sourceColumn: IsWeekend
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimDate = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\HP\Desktop\01_DATA_ANALYTICS_POWERBI\bankspere360\data\DimDate.csv"),[Delimiter=",", Columns=9, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"DateKey", Int64.Type}, {"Date", type date}, {"Day", Int64.Type}, {"Month", Int64.Type}, {"MonthName", type text}, {"Quarter", Int64.Type}, {"Year", Int64.Type}, {"IsWeekend", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

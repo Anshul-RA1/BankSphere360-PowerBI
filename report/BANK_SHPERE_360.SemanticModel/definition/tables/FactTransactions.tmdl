@@ -1,0 +1,79 @@
+table FactTransactions
+	lineageTag: 14b23894-56c7-43d2-af47-c576cd0f5fd6
+
+	column TransactionID
+		dataType: int64
+		formatString: 0
+		lineageTag: c500697f-c8ab-421d-9780-ae15ebc5534d
+		summarizeBy: count
+		sourceColumn: TransactionID
+
+		annotation SummarizationSetBy = Automatic
+
+	column AccountID
+		dataType: int64
+		formatString: 0
+		lineageTag: e91e67ef-2920-4fb8-a774-9ba67102e897
+		summarizeBy: none
+		sourceColumn: AccountID
+
+		annotation SummarizationSetBy = Automatic
+
+	column DateKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 134ac8fd-a064-41c6-8be6-5e74c977076f
+		summarizeBy: none
+		sourceColumn: DateKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column Channel
+		dataType: string
+		lineageTag: 8612be90-5b25-44fa-9a97-aaf37058cc81
+		summarizeBy: none
+		sourceColumn: Channel
+
+		annotation SummarizationSetBy = Automatic
+
+	column TxnType
+		dataType: string
+		lineageTag: 99dcc3b2-c393-4a6a-b115-a46d2b6bb33e
+		summarizeBy: none
+		sourceColumn: TxnType
+
+		annotation SummarizationSetBy = Automatic
+
+	column Amount
+		dataType: double
+		lineageTag: 9e2117e4-e8b4-42c2-90cb-4cb891557571
+		summarizeBy: sum
+		sourceColumn: Amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column IsFraudFlag
+		dataType: int64
+		formatString: 0
+		lineageTag: 21420c7f-64a1-4dbb-89e9-6573980a63cf
+		summarizeBy: sum
+		sourceColumn: IsFraudFlag
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FactTransactions = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\HP\Desktop\01_DATA_ANALYTICS_POWERBI\bankspere360\data\FactTransactions.csv"),[Delimiter=",", Columns=7, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"TransactionID", Int64.Type}, {"AccountID", Int64.Type}, {"DateKey", Int64.Type}, {"Amount", type number}, {"IsFraudFlag", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

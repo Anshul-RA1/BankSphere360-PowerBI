@@ -1,0 +1,183 @@
+/* =====================================================================
+   BankSphere 360 — COMPLETE DAX MEASURE LIBRARY
+   Per your standing instruction: every measure is explained line-by-line
+   BEFORE you paste it into Power BI. Create a blank table "_Measures"
+   (Home > Enter Data > empty) and put all of these inside it.
+   ===================================================================== */
+
+
+/* ---------------------------------------------------------------------
+   1. Total Deposits
+   WHAT: Sum of balances for deposit products only.
+   WHY:  Deposits are the bank's funding base; the headline liability KPI.
+   HOW:  CALCULATE changes the filter context so SUM only sees rows where
+         the related product category is "Deposits". The filter argument
+         travels through the DimProduct -> FactAccounts relationship.
+   --------------------------------------------------------------------- */
+Total Deposits =
+CALCULATE (
+    SUM ( FactAccounts[Balance] ),               -- aggregate the balance column
+    DimProduct[ProductCategory] = "Deposits"     -- restrict context to deposits
+)
+
+
+/* ---------------------------------------------------------------------
+   2. Total Loan Book (Outstanding)
+   WHAT: Total outstanding principal across all loans.
+   WHY:  The asset side; what the bank is owed and the base for NPA%.
+   HOW:  Simple SUM; no filter needed because FactLoans is all loans.
+   --------------------------------------------------------------------- */
+Total Loan Book =
+SUM ( FactLoans[OutstandingAmount] )
+
+
+/* ---------------------------------------------------------------------
+   3. Total Transaction Count
+   WHAT: Number of transaction rows in the current filter context.
+   WHY:  Activity / throughput measure for channel analysis.
+   HOW:  COUNTROWS counts rows of the fact table after filters apply.
+   --------------------------------------------------------------------- */
+Total Transactions =
+COUNTROWS ( FactTransactions )
+
+
+/* ---------------------------------------------------------------------
+   4. Total Transaction Value
+   WHAT: Money moved through transactions.
+   WHY:  Drives channel mix, MoM/YoY trend, branch ranking.
+   --------------------------------------------------------------------- */
+Total Txn Value =
+SUM ( FactTransactions[Amount] )
+
+
+/* ---------------------------------------------------------------------
+   5. NPA Amount   (Non-Performing Assets)
+   WHAT: Outstanding on loans flagged NPA (90+ days past due).
+   WHY:  The single most-watched risk number in a bank.
+   HOW:  CALCULATE narrows SUM to rows where NPAFlag = 1.
+   --------------------------------------------------------------------- */
+NPA Amount =
+CALCULATE (
+    SUM ( FactLoans[OutstandingAmount] ),
+    FactLoans[NPAFlag] = 1
+)
+
+
+/* ---------------------------------------------------------------------
+   6. NPA %
+   WHAT: NPA amount as a share of the total loan book.
+   WHY:  Asset-quality ratio; regulators and CXOs track it monthly.
+   HOW:  DIVIDE returns blank instead of error on divide-by-zero.
+         [NPA Amount] and [Total Loan Book] are reused measures.
+   --------------------------------------------------------------------- */
+NPA % =
+DIVIDE ( [NPA Amount], [Total Loan Book] )
+
+
+/* ---------------------------------------------------------------------
+   7. Active Customers
+   WHAT: Distinct customers holding at least one Active account.
+   WHY:  Engagement / customer-health KPI.
+   HOW:  DISTINCTCOUNT removes duplicates; CALCULATE filters to Active.
+   --------------------------------------------------------------------- */
+Active Customers =
+CALCULATE (
+    DISTINCTCOUNT ( FactAccounts[CustomerID] ),
+    FactAccounts[Status] = "Active"
+)
+
+
+/* ---------------------------------------------------------------------
+   8. CASA Ratio  (Current Account Savings Account)
+   WHAT: Share of deposits held in cheap current+savings accounts.
+   WHY:  High CASA = low-cost funding = better margins.
+   HOW:  VAR computes the CASA numerator once; IN tests membership of a
+         list; DIVIDE produces the ratio safely.
+   --------------------------------------------------------------------- */
+CASA Ratio =
+VAR CASA =
+    CALCULATE (
+        [Total Deposits],
+        DimProduct[ProductName] IN { "Savings Account", "Current Account" }
+    )
+RETURN
+    DIVIDE ( CASA, [Total Deposits] )
+
+
+/* ---------------------------------------------------------------------
+   9. Deposits YTD  (time intelligence)
+   WHAT: Deposits accumulated from Jan 1 to the date in context.
+   WHY:  Year-to-date tracking against annual targets.
+   HOW:  TOTALYTD needs a marked Date table (DimDate) with continuous dates.
+   --------------------------------------------------------------------- */
+Deposits YTD =
+TOTALYTD ( [Total Deposits], DimDate[Date] )
+
+
+/* ---------------------------------------------------------------------
+   10. Txn Value Last Year
+   WHAT: Same period one year earlier.
+   WHY:  Building block for YoY growth.
+   HOW:  SAMEPERIODLASTYEAR shifts the date filter back 12 months.
+   --------------------------------------------------------------------- */
+Txn Value LY =
+CALCULATE ( [Total Txn Value], SAMEPERIODLASTYEAR ( DimDate[Date] ) )
+
+
+/* ---------------------------------------------------------------------
+   11. Txn YoY %
+   WHAT: Year-over-year growth of transaction value.
+   HOW:  (Current - LastYear) / LastYear, guarded by DIVIDE.
+   --------------------------------------------------------------------- */
+Txn YoY % =
+DIVIDE ( [Total Txn Value] - [Txn Value LY], [Txn Value LY] )
+
+
+/* ---------------------------------------------------------------------
+   12. Txn MoM %
+   WHAT: Month-over-month growth.
+   HOW:  VAR holds current & prior month (DATEADD shifts -1 month),
+         then DIVIDE computes the change. VAR = evaluated once = faster.
+   --------------------------------------------------------------------- */
+Txn MoM % =
+VAR CurrentVal = [Total Txn Value]
+VAR PrevVal =
+    CALCULATE ( [Total Txn Value], DATEADD ( DimDate[Date], -1, MONTH ) )
+RETURN
+    DIVIDE ( CurrentVal - PrevVal, PrevVal )
+
+
+/* ---------------------------------------------------------------------
+   13. Branch Rank by Txn Value
+   WHAT: Ranks branches 1..N on transaction value.
+   HOW:  RANKX iterates over ALL branch names (ignoring the visual's own
+         branch filter so every branch is compared), DESC = biggest = 1.
+   --------------------------------------------------------------------- */
+Branch Rank =
+RANKX ( ALL ( DimBranch[BranchName] ), [Total Txn Value], , DESC )
+
+
+/* ---------------------------------------------------------------------
+   14. Fraud Flagged Value
+   WHAT: Value of transactions flagged as suspected fraud.
+   WHY:  Feeds the compliance / risk view.
+   --------------------------------------------------------------------- */
+Fraud Flagged Value =
+CALCULATE ( [Total Txn Value], FactTransactions[IsFraudFlag] = 1 )
+
+
+/* ---------------------------------------------------------------------
+   15. NPA Target  (scorecard target, a constant measure)
+   WHAT: Board-approved tolerance for NPA% (4%).
+   USE:  Conditional-format the NPA card red when [NPA %] > [NPA Target].
+   --------------------------------------------------------------------- */
+NPA Target = 0.04
+
+
+/* ---------------------------------------------------------------------
+   16. NPA Status (text/emoji status for the scorecard)
+   WHAT: Returns a status string by comparing actual to target.
+   HOW:  Simple IF on the two measures.
+   --------------------------------------------------------------------- */
+NPA Status =
+IF ( [NPA %] > [NPA Target], "At Risk", "Within Tolerance" )
