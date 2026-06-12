@@ -107,16 +107,12 @@ BankSphere360-PowerBI/
 
 Each development day is documented in `/docs` with two parts:
 
-1. **Build journey** — what was built, why, with full DAX explanations
-2. **Interview Q&A** — keyword → spoken answer → senior-signal format for interview prep
-
-A complete **mock interview pack** (25 questions across Technical, Managerial, and HR rounds) is included.
-
----
-
 ## 👤 Author
 
 **Anshul Raghuvanshi**
-[LinkedIn](www.linkedin.com/in/
+
+# [LinkedIn](www.linkedin.com/in/
+
 raghuvanshi-anshul)
-[GitHub](https://github.com/Anshul-RA1)
+
+# [GitHub](https://github.com/Anshul-RA1)
