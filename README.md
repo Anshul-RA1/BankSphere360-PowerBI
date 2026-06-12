@@ -111,6 +111,6 @@ Each development day is documented in `/docs` with two parts:
 
 **Anshul Raghuvanshi**
 
-#### [LinkedIn](www.linkedin.com/in/raghuvanshi-anshul)
+#### [LinkedIn](https://www.linkedin.com/in/raghuvanshi-anshul/)
 
 #### [GitHub](https://github.com/Anshul-RA1)
